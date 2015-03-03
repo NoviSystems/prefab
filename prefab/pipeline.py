@@ -30,7 +30,7 @@ def once(f):
 
         puts("pipeline: '%s' task already executed! " % f.__name__)
         if output.debug:
-            puts('pipeline: Cached results: %(host)s' % host_cache)
+            puts('pipeline: Cached results: %s' % host_cache[host])
 
         return True
 
