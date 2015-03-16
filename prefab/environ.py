@@ -3,6 +3,12 @@ from fabric.api import env, task
 from fabric.contrib import django
 
 import json
+import os
+
+DEFAULTS = {
+    "django_settings": os.environ.get("DJANGO_SETTINGS_MODULE", ""),
+    "upload_settings": False,
+}
 
 
 def load_from_file(environ, path='environ.json'):
@@ -14,6 +20,7 @@ def load_from_file(environ, path='environ.json'):
         fabenv = conf.pop('env', {})
 
         # for now, also use env to store other global state
+        env.update(DEFAULTS)
         env.update(conf)
 
         # and finally update with the env dict
