@@ -1,8 +1,8 @@
 
 from fabric.contrib import django
-from fabric.api import task
+from fabric.api import env, task
 
-from prefab.environ import environ
+from prefab.environ import load
 
 __all__ = [
     'settings', 'environ', 'shell',
@@ -11,6 +11,15 @@ __all__ = [
 
 # turn fabric helper method into an actual task.
 settings = task(name='settings')(django.settings_module)
+
+
+@task
+def environ(environ):
+    """
+    Setup the environment that is being worked on.  [prod, stag, test, default]
+    """
+    env.environ = environ
+    load(environ)
 
 
 @task

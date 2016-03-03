@@ -1,6 +1,6 @@
 
-from prefab.tasks.utils import *
-from prefab.tasks import vagrant
+from .utils import *
+from fabtools.vagrant import vagrant
 
 
 __all__ = [
