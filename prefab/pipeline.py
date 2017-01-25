@@ -25,14 +25,7 @@ def once(f):
     host_format = "%(host)s:%(port)s"
 
     def has_executed(host):
-        if host not in host_cache:
-            return False
-
-        puts("pipeline: '%s' task already executed! " % f.__name__)
-        if output.debug:
-            puts('pipeline: Cached results: %s' % host_cache[host])
-
-        return True
+        return host in host_cache
 
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -40,6 +33,10 @@ def once(f):
         host = host_format % env
         if not has_executed(host):
             host_cache[host] = f(*args, **kwargs)
+        else:
+            if output.debug:
+                puts("pipeline: '%s' task already executed!" % f.__name__)
+                puts('pipeline: Cached results: %s' % host_cache[host])
         return host_cache[host]
 
     decorated.host_cache = host_cache
@@ -58,19 +55,8 @@ def requires(*prereqs):
 
         @functools.wraps(f)
         def decorated(*args, **kwargs):
-            puts('pipeline: checking requirements...')
-
-            # perform once checking before calling execute.
             for req in prereqs:
-                should_exec = True
-
-                if hasattr(req, 'once') and req.once:
-                    host = req.host_format % env
-                    if req.has_executed(host):
-                        should_exec = False
-
-                if should_exec:
-                    execute(req)
+                execute(req)
 
             return f(*args, **kwargs)
 
@@ -90,18 +76,18 @@ def process(*tasks):
 
     """
     names = [s.__name__ for s in tasks]
-    expanded_tasks = _expand_tasks(tasks)
-    expanded_names = [s.__name__ for s in expanded_tasks]
+    tasks = _expand_tasks(tasks)
 
+    # print task execution order
     puts('pipeline: processing tasks %s' % names)
-    print
-
     puts('pipeline: execution order')
-    for name in expanded_names:
-        puts('pipeline:   - %s' % name)
+    for task in tasks:
+        puts('pipeline:   - %s' % task.__name__)
     print
 
-    for task in expanded_tasks:
+    # execute tasks
+    for task in tasks:
+        puts('pipeline: executing \'%s\'' % task.__name__)
         execute(task)
 
 
