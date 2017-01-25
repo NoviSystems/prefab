@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='prefab',
-    version='0.0.1',
+    version='0.0.2',
     license='BSD License',
 
     description='More tools for writing awesome Fabric files',
