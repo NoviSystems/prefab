@@ -66,6 +66,23 @@ def requires(*prereqs):
     return decorator
 
 
+def environ(*names):
+    def decorator(f):
+
+        @functools.wraps(f)
+        def decorated(*args, **kwargs):
+            # environment variables *should* be gathered in `process`, but
+            # this is necessary in case the task is executed on its own.
+            for name in names:
+                gather(name)
+            return f(*args, **kwargs)
+
+        decorated.envvars = names
+        return decorated
+
+    return decorator
+
+
 def process(*tasks):
     """
     A convenience function for executing tasks within a pipeline. Pre-determines
@@ -84,6 +101,19 @@ def process(*tasks):
     for task in tasks:
         puts('pipeline:   - %s' % task.__name__)
     print
+
+    # process envvars gathering upfront
+    envvars = [getattr(task, 'envvars', []) for task in tasks]  # get lists of vars for tasks
+    envvars = itertools.chain(*envvars)  # chain lists into a single list
+    envvars = list(OrderedDict.fromkeys(envvars))  # remove duplicates from list
+
+    # front load environment variable gathering.
+    if envvars:
+        puts('pipeline: gathering environment variables')
+        for name in envvars:
+            puts('pipeline: \'%s\' environment' % name)
+            gather(name)
+        print
 
     # execute tasks
     for task in tasks:
