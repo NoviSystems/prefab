@@ -2,7 +2,7 @@
 from fabric.contrib import django
 from fabric.api import env, task
 
-from prefab.environ import load
+from prefab.environ import fabenv
 
 __all__ = [
     'settings', 'environ', 'shell',
@@ -19,7 +19,7 @@ def environ(environ):
     Setup the environment that is being worked on.  [prod, stag, test, default]
     """
     env.environ = environ
-    load(environ)
+    fabenv(environ)
 
 
 @task
