@@ -24,3 +24,26 @@ def fabenv(environ, path='environ.json'):
 
         # and finally update with the env dict
         env.update(conf.pop('env', {}))
+
+
+def register(name, defaults):
+    """
+    """
+    env.envvars[name] = defaults
+
+
+def gather(name, **kwargs):
+    """
+    """
+    envvars = env.envvars[name]
+    envvars.update(kwargs)
+
+    for key, value in envvars.items():
+        if callable(value):
+            envvars[key] = value()
+
+    return envvars
+
+
+if 'envvars' not in env:
+    env.envvars = {}
