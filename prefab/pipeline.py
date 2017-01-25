@@ -1,8 +1,40 @@
+from __future__ import absolute_import
 
-from fabric.api import env, execute, puts
-from fabric.state import output
-
+import itertools
 import functools
+from collections import OrderedDict
+
+from fabric.api import env, execute as _execute, puts
+from fabric.state import output
+from fabtools.vagrant import ssh_config
+
+from prefab.environ import gather
+
+
+def _vagrant(name=''):
+    config = ssh_config(name)
+
+    settings = {
+        'user': config['User'],
+        'key_filename': config['IdentityFile'].strip('"'),
+        'forward_agent': config.get('ForwardAgent', 'no') == 'yes',
+        'disable_known_hosts': True,
+    }
+
+    env.update(settings)
+
+
+def execute(task):
+    """
+    Perform vagrant checking before executing task
+    """
+    # setup env from a VM name
+    if env.get('vagrant', False):
+        # Use KeyError to fail - ip_map is necessary
+        ip_map = env['vagrant']['ip_map']
+        _vagrant(ip_map[env.host])
+
+    _execute(task)
 
 
 def once(f):
